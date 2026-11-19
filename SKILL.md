@@ -3,8 +3,8 @@ name: plan-to-ship
 description: "Main-session ↔ subagent collaboration protocol for coding agents: the main session writes a contract whose milestones have executable exit criteria, briefs ONE milestone at a time to a subagent, then independently re-runs the verification instead of trusting the report, and alone owns the status board. Use whenever work is delegated to subagents, when a subagent report must be audited, or when a task spans several sessions and needs evidence-backed acceptance. Also use for planning requests: 制定计划 / 做计划 / 定个计划 / 定个修复计划 / 排计划 / 规划一下 / 拆任务 / 派子智能体 / 开始执行 / 开始动工 / 开始干活 / make a plan / write a fix plan / break this into milestones / dispatch subagents / implement while you review. Not for a one-file quick edit, not for merely reading an existing plan, and not for exploratory work with no settled approach."
 license: MIT
 metadata:
-  version: "0.4"
-  status: generic
+  version: "0.2.0"
+  status: stable
 ---
 
 # Plan to Ship — 主会话与子智能体的协作协议
