@@ -1,4 +1,4 @@
 node_modules/
 .DS_Store
 *.log
-_msg.txt
+_msg*.txt
