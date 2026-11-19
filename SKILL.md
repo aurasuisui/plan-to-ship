@@ -1,16 +1,23 @@
 ---
 name: plan-to-ship
-description: "Turn a request into a verifiable plan, then dispatch ONE milestone at a time to a subagent while you review. Use for ANY request that asks for a plan before work, not just one exact phrase: 制定计划 / 做计划 / 定个计划 / 定个修复计划 / 排计划 / 规划一下 / 拆任务 / 排期 / 先计划再动手 / 开始执行 / 开始动工 / 开始干活; also English: make a plan, write a fix plan, plan this out, break this into milestones, dispatch subagents, implement while you review. Also use when auditing a subagent report, or when a task spans several sessions and needs evidence-backed acceptance. Not for a one-file quick edit, not for merely reading an existing plan, and not for exploratory work with no settled approach."
+description: "Main-session ↔ subagent collaboration protocol for coding agents: the main session writes a contract whose milestones have executable exit criteria, briefs ONE milestone at a time to a subagent, then independently re-runs the verification instead of trusting the report, and alone owns the status board. Use whenever work is delegated to subagents, when a subagent report must be audited, or when a task spans several sessions and needs evidence-backed acceptance. Also use for planning requests: 制定计划 / 做计划 / 定个计划 / 定个修复计划 / 排计划 / 规划一下 / 拆任务 / 派子智能体 / 开始执行 / 开始动工 / 开始干活 / make a plan / write a fix plan / break this into milestones / dispatch subagents / implement while you review. Not for a one-file quick edit, not for merely reading an existing plan, and not for exploratory work with no settled approach."
 license: MIT
 metadata:
-  version: "0.2"
+  version: "0.3"
   status: generic
 ---
 
-# Plan to Ship — 先计划,再派单,最后审核
+# Plan to Ship — 主会话与子智能体的协作协议
 
-用户说「制定计划」时,你**只产出计划**;说「开始执行 / 开始动工」时,你**先有计划的执行**。
-无论如何,**改代码的人不是判分的人**。
+**核心命题:动手的人和判分的人不能是同一次输出。**
+
+主会话(你)负责:定契约、派单、**独立复跑**、判定、维护台账。
+子智能体负责:执行**一个**里程碑,报「待审核」+ 四件真实输出。
+
+计划不是文档作业 —— 它是**派单的依据**和**审核的清单**。没有可执行的出口条件,你就只能凭感觉验收;
+没有禁止清单,子智能体会顺手改到不该改的地方。
+
+用户说「制定计划」时,你**只产出契约**;说「开始执行 / 开始动工」时,你**按契约一次派一个**。
 
 ## 0. 三个触发词对应三个动作
 
@@ -22,13 +29,15 @@ metadata:
 
 **判定点**:计划写完就停,除非用户明确说「计划做完直接开始」。
 
-## 1. 五条铁律
+## 1. 六条铁律
 
-1. **先计划后动手**:第一个交付物是计划文件,不是 diff。
-2. **判分权分离**:子智能体只能报「待审核」;✅ 只能由你(审核者)填。
-3. **一次一个里程碑**:派单要小到能在一轮内验收完。
-4. **不可逆动作必须问人**:发布、打 tag、合并、删除、强推、迁移、改生产数据。
-5. **证据优先于叙述**:不接受「已完成/基本完成」,只接受命令、输出、commit、run id。
+1. **角色分离**(最重要):主会话判、子智能体做;**子智能体的自述不是证据**,主会话必须自己跑一遍验收命令。
+
+2. **先计划后动手**:第一个交付物是计划文件,不是 diff。
+3. **判分权分离**:子智能体只能报「待审核」;✅ 只能由你(审核者)填。
+4. **一次一个里程碑**:派单要小到能在一轮内验收完。
+5. **不可逆动作必须问人**:发布、打 tag、合并、删除、强推、迁移、改生产数据。
+6. **证据优先于叙述**:不接受「已完成/基本完成」,只接受命令、输出、commit、run id。
 
 ## 2. 阶段 A —— 制定计划
 
@@ -39,7 +48,7 @@ metadata:
 5. **自检**:`node <skill>/scripts/plan-lint.mjs <plan>` —— 0 error 才准提交。
 6. **提交计划**(单独一个 commit),然后回报:「计划已就绪,里程碑 M1..Mn,是否开始执行?」
 
-## 3. 阶段 B —— 开始执行(循环)
+## 3. 阶段 B —— 派单与审核(循环)
 
 对每一个里程碑:
 
@@ -56,6 +65,25 @@ metadata:
    - 通过 → 更新看板 ✅(写证据:命令 + 关键输出)→ 提交 → 下一个;
    - 驳回 → 给**具体理由 + 复跑命令**,再派一次;两次不过就停下来问用户。
 8. **异常即停**:它报告"与预期不符"时,先处理异常,不要让它"顺手修好"。
+
+## 3.5 与子智能体的协作边界
+
+| 事项 | 主会话 | 子智能体 |
+|---|---|---|
+| 写契约 / 看板 / 台账 | ✅ 唯一 | ❌ |
+| 写实现 / 测试 / 文档改动 | ❌ | ✅ 唯一 |
+| 判定 ✅ / 驳回 | ✅ | ❌(只报「待审核」) |
+| 自己复跑验收命令 | ✅ 必须 | 可以跑,但**不算证据** |
+| 不可逆动作 | 等人类口令 | 无权执行 |
+
+**派单必须自包含**:子智能体看不到主会话的上下文,也不会自动加载主会话加载过的东西。
+所以派单里要写:仓库绝对路径、分支、开工前必读(给**绝对路径**)、范围、禁止、验收命令、停下点、汇报格式。
+
+**领域技能**:子智能体通常能看到技能目录,但**不会自动加载正文**。派单里点名 + 要求它用 3 行复述硬规则;
+复述不出来 = 没真加载,直接打回(详见 `references/brief-template.md`)。
+
+**审核不用它的输出**:主会话自己跑一遍验收命令,再查 `git diff --stat` 边界与 `git diff -- '*test*'` 有没有放宽断言。
+它的报告只用来**对照**,不用来当结论。
 
 ## 4. 阶段 C —— 验收与不可逆动作
 
@@ -91,6 +119,8 @@ node scripts/collect-evidence.mjs <base>    # 收 commit/diff/CI 原始证据
 
 ## 7. 常见失败(详见 references/failure-modes.md)
 
+- 主会话没跑验收命令就相信子智能体的「已完成」。
+- 派单没写禁止清单,子智能体顺手改了测试或契约。
 - 用户说「开始动手」就直接改代码,没有计划 → 后面无法验收。
 - 一次派了 5 个里程碑,回来一堆半成品。
 - 子智能体说"测试通过",你没跑,结果 CI 红。
