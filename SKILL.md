@@ -3,7 +3,7 @@ name: plan-to-ship
 description: "Main-session ↔ subagent collaboration protocol for coding agents: the main session writes a contract whose milestones have executable exit criteria, briefs ONE milestone at a time to a subagent, then independently re-runs the verification instead of trusting the report, and alone owns the status board. Use whenever work is delegated to subagents, when a subagent report must be audited, or when a task spans several sessions and needs evidence-backed acceptance. Also use for planning requests: 制定计划 / 做计划 / 定个计划 / 定个修复计划 / 排计划 / 规划一下 / 拆任务 / 派子智能体 / 开始执行 / 开始动工 / 开始干活 / make a plan / write a fix plan / break this into milestones / dispatch subagents / implement while you review. Not for a one-file quick edit, not for merely reading an existing plan, and not for exploratory work with no settled approach."
 license: MIT
 metadata:
-  version: "0.3"
+  version: "0.4"
   status: generic
 ---
 
@@ -40,6 +40,10 @@ metadata:
 6. **证据优先于叙述**:不接受「已完成/基本完成」,只接受命令、输出、commit、run id。
 
 ## 2. 阶段 A —— 制定计划
+
+0. **接手方向时先验证再复述**(讨论会话 → 执行会话的交接):让新会话只读验证「假设清单」,再用模板复述;
+   复述不过不开工。假设清单每条写「断言 / 验证方法 / 预期 / 不符时怎么办」——**不符时怎么办**是灵魂。
+   完整流程见 `references/onboarding-a-session.md`。
 
 1. **侦察**(只读):`git status`、`git log --oneline -10`、README / AGENTS / CONTRIBUTING、现有 CI 配置、测试命令。
 2. **找验证命令**:把仓库真正用的格式检查 / 类型检查 / 测试 / 构建命令抄下来,写进计划;找不到就问用户。
